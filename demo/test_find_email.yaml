@@ -1,0 +1,65 @@
+---
+version: v0.1
+catalog:
+  - &client_name |
+    CREATE TABLE client_name (
+        user_id     INTEGER
+      , first_name  VARCHAR
+      , last_name   VARCHAR
+    );
+  - &contact_info |
+    CREATE TABLE contact_info (
+        user_id     INTEGER
+      , email       VARCHAR
+    );
+
+suite: Find Email by Last Name
+cases:
+
+  - uid: fe001
+    msg: Can't find email with last name Ma.
+    sql: !file find_email.sql
+    var:
+      last_name: "Ma"
+    env:
+      - metadata: *client_name
+        records: !fwf |
+          user_id   first_name  last_name
+          1         Jack        Ma
+          2         Tony        Ma
+          3         Robin       Li
+      - metadata: *contact_info
+        records: !csv |
+          user_id,email
+          1,jack_ma@alibaba.com
+          2,tony_ma@qq.com
+          6,robin_li@baidu.com
+    exp:
+      where: result set
+      records: !fwf |
+        mail
+        jack_ma@alibaba.com
+        tony_ma@qq.com
+
+  - uid: fe002
+    msg: Can't find email with last name Ma.
+    sql: !file find_email.sql
+    var:
+      last_name: "Ma"
+    env:
+      - metadata: *client_name
+        records: !fwf |
+          user_id   first_name  last_name
+          1         Jack        Ma
+          2         Tony        Ma
+          3         Robin       Li
+      - metadata: *contact_info
+        records: !fwf |
+          user_id   email
+          1         jack_ma@alibaba.com
+          6         robin_li@baidu.com
+    exp:
+      where: result set
+      records: !fwf |
+        mail
+        jack_ma@alibaba.com
